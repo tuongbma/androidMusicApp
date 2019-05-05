@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SongsManager {
-	// SDCard Path
-	final String MEDIA_PATH = new String("/sdcard/Download/");
+
 	private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
 	
 	// Constructor
@@ -19,7 +18,9 @@ public class SongsManager {
 	 * Function to read all mp3 files from sdcard
 	 * and store the details in ArrayList
 	 * */
-	public ArrayList<HashMap<String, String>> getPlayList(){
+	public ArrayList<HashMap<String, String>> getOfflineList(){
+		// SDCard Path
+		String MEDIA_PATH = new String("/sdcard/Download/");
 		File home = new File(MEDIA_PATH);
 
 		if (home.listFiles(new FileExtensionFilter()).length > 0) {
@@ -27,7 +28,6 @@ public class SongsManager {
 				HashMap<String, String> song = new HashMap<String, String>();
 				song.put("songTitle", file.getName().substring(0, (file.getName().length() - 4)));
 				song.put("songPath", file.getPath());
-				
 				// Adding each song to SongList
 				songsList.add(song);
 			}
@@ -35,7 +35,11 @@ public class SongsManager {
 		// return songs list array
 		return songsList;
 	}
-	
+
+	public ArrayList<HashMap<String, String>> getOnlineList(String searchQuery){
+		// do online search
+		return songsList;
+	}
 	/**
 	 * Class to filter files which are having .mp3 extension
 	 * */

@@ -20,7 +20,7 @@ public class MainActivity extends Activity {
         btnOffline.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, PlayListActivity.class);
+                Intent intent = new Intent(MainActivity.this, PlayMusicActivity.class);
                 startActivity(intent);
             }
         });

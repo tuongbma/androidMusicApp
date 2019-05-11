@@ -49,11 +49,13 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
     private MediaPlayer mp;
     // Handler to update UI timer, progress bar etc,.
     private Handler mHandler = new Handler();
-    private String textSearch;
+    private Long mode;
+    private Long typeSearch;
     private Utilities utils;
     private int seekForwardTime = 5000; // 5000 milliseconds
     private int seekBackwardTime = 5000; // 5000 milliseconds
     private int currentSongIndex = 0;
+    private String textSearch;
     private boolean isShuffle = false;
     private boolean isRepeat = false;
     private static final String SERVER_STORAGE = "https://firebasestorage.googleapis.com/v0/b/musicapplication-f21a5.appspot.com/o/";
@@ -99,12 +101,27 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
 //		// By default play first song
 //		System.out.println("SONG LIST SIZE" + songsList.size());
 //		System.out.println("CURRENT SONG:" + currentSongIndex);
-        songsListOffline = songManager.getOfflineList();
-        songsList = songsListOffline;
-        if(songsList.size() > 0) {
-            playSong(0);
-        }
+//        songsListOffline = songManager.getOfflineList();
+//        songsList = songsListOffline;
+//        if(songsList.size() > 0) {
+//            playSong(0);
+//        }
         System.out.println("ON CREATEEEEEE");
+        Intent intent = getIntent();
+        mode = intent.getExtras().getLong("MODE");
+        //xu li khi che do phat nhac online
+        if(mode != null && Constants.MODE.ONLINE.equals(mode)) {
+            textSearch = intent.getExtras().getString("txtSearch");
+            currentSongIndex = intent.getExtras().getInt("songOnlineIndex");
+            typeSearch = intent.getExtras().getLong("typeSearch");
+            playSongOnline(currentSongIndex);
+        } else if(mode != null && Constants.MODE.OFFLINE.equals(mode)) {
+            songsListOffline = songManager.getOfflineList();
+            songsList = songsListOffline;
+            if(songsList.size() > 0) {
+                playSong(0);
+            }
+        }
 
         /**
          * Play button click event
@@ -186,15 +203,18 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
             @Override
             public void onClick(View arg0) {
                 // check if next song is there or not
-                if (currentSongIndex < (songsList.size() - 1)) {
-                    playSong(currentSongIndex + 1);
-                    currentSongIndex = currentSongIndex + 1;
-                } else {
-                    // play first song
-                    playSong(0);
-                    currentSongIndex = 0;
-                }
+                if(Constants.MODE.ONLINE.equals(mode)) {
 
+                } else {
+                    if (currentSongIndex < (songsList.size() - 1)) {
+                        playSong(currentSongIndex + 1);
+                        currentSongIndex = currentSongIndex + 1;
+                    } else {
+                        // play first song
+                        playSong(0);
+                        currentSongIndex = 0;
+                    }
+                }
             }
         });
 
@@ -274,9 +294,18 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
 
             @Override
             public void onClick(View arg0) {
-                songsList = songsListOffline;
-                Intent offlinePlaylist = new Intent(PlayMusicActivity.this, OfflineActivity.class);
-                startActivityForResult(offlinePlaylist, 100);
+                Intent in;
+                if(Constants.MODE.OFFLINE.equals(mode)) {
+                    songsList = songsListOffline;
+                    in = new Intent(PlayMusicActivity.this, OfflineActivity.class);
+                    startActivityForResult(in, Constants.MODE.OFFLINE.intValue());
+                } else {
+                    in = new Intent(PlayMusicActivity.this, OnlineActivity.class);
+                    in.putExtra("txtSearch", textSearch);
+                    in.putExtra("typeSearch", typeSearch);
+                    startActivityForResult(in, Constants.MODE.ONLINE.intValue());
+                }
+
 //				startActivity(i);
             }
         });
@@ -315,7 +344,7 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
             // play selected song
 
         }
-        if (requestCode == 101) { // play online
+        if (requestCode == Constants.MODE.ONLINE.intValue()) { // play online
             try{
                 Intent intent = getIntent();
                 textSearch = intent.getExtras().getString("txtSearch");
@@ -366,13 +395,13 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
     public void  playSongOnline(final int songIndex){
         // Play song
         try {
-
             mp.reset();
             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            songManager.readData(textSearch, new SongsManager.MyCallback() {
+            songManager.readData(textSearch, typeSearch, new SongsManager.MyCallback() {
                 @Override
                 public void onCallback(ArrayList<HashMap<String, String>> value) {
                     try {
+                        songsList = value;
                         String source = SERVER_STORAGE + value.get(songIndex).get("songPath");
                         Uri uri = Uri.parse(source);
                         mp.setDataSource(source);

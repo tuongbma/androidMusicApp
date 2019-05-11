@@ -47,7 +47,7 @@ import java.util.HashMap;
 
 
 
-public class MainActivity<recordingBufferLock> extends ListActivity {
+public class MainActivity<recordingBufferLock> extends Activity {
 
     private Button  btnOffline;
     private ImageButton btnOnline;
@@ -104,9 +104,9 @@ public class MainActivity<recordingBufferLock> extends ListActivity {
         btnOnline = (ImageButton) findViewById(R.id.btnSearch);
         btnOffline = (Button) findViewById(R.id.btnOffline);
         edtSearch = (EditText) findViewById(R.id.searchText);
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        lvSearch = getListView();
-        lvSearch.setAdapter(adapter);
+//        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+//        lvSearch = getListView();
+//        lvSearch.setAdapter(adapter);
         btnOffline.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -128,38 +128,22 @@ public class MainActivity<recordingBufferLock> extends ListActivity {
             }
         });
 
-        edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                performSearch(edtSearch.getText().toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-    }
-
-
-    public void performSearch(String txtSearch) {
-        SongsManager songsManager = new SongsManager();
-        songsManager.readData(txtSearch, new SongsManager.MyCallback() {
-            @Override
-            public void onCallback(ArrayList<HashMap<String, String>> songList) {
-                System.out.println("size songlist:" + songList.size());
-                ListAdapter adapter = new SimpleAdapter(MainActivity.this, songList,
-                        R.layout.playlist_item, new String[] { "songTitle" }, new int[] {
-                        R.id.songTitle });
-                setListAdapter(adapter);
-            }
-
-        });
+//        edtSearch.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                performSearch(edtSearch.getText().toString());
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//
+//            }
+//        });
 
         String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
         Log.i(LOG_TAG, "Reading labels from: " + actualLabelFilename);
@@ -198,11 +182,26 @@ public class MainActivity<recordingBufferLock> extends ListActivity {
         tfLite.resizeInput(0, new int[] {RECORDING_LENGTH, 1});
 
         // Start the recording and recognition threads.
-        requestMicrophonePermission();
-        startRecording();
-        startRecognition();
-
+//        requestMicrophonePermission();
+//        startRecording();
+//        startRecognition();
     }
+
+
+//    public void performSearch(String txtSearch) {
+//        SongsManager songsManager = new SongsManager();
+//        songsManager.readData(txtSearch, new SongsManager.MyCallback() {
+//            @Override
+//            public void onCallback(ArrayList<HashMap<String, String>> songList) {
+//                System.out.println("size songlist:" + songList.size());
+//                ListAdapter adapter = new SimpleAdapter(MainActivity.this, songList,
+//                        R.layout.playlist_item, new String[] { "songTitle" }, new int[] {
+//                        R.id.songTitle });
+//                setListAdapter(adapter);
+//            }
+//
+//        });
+//    }
 
     private void requestMicrophonePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

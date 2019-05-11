@@ -30,23 +30,25 @@ public class OnlineActivity extends ListActivity {
     private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
     private int currentSongIndex = 0;
     private String txtSearch;
+    private Long ONLINE_MODE = 2L;
+    private Long typeSearch;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.show_list_songs);
+        setContentView(R.layout.online_activity);
 
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         lvSong = getListView();
-        lvSong.setAdapter(adapter);
-
-
         // Getting all songs list
         Intent intent = getIntent();
         currentSongIndex = intent.getExtras().getInt("songIndex");
-        txtSearch = intent.getExtras().getString("textSearch");
-
-
+        txtSearch = intent.getExtras().getString("txtSearch");
+        typeSearch = intent.getExtras().getLong("typeSearch");
+        if(typeSearch == null) {
+            typeSearch = Constants.SEARCH_TYPE.TITLE;
+        }
+        performSearch(txtSearch);
 
         lvSong.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -54,11 +56,13 @@ public class OnlineActivity extends ListActivity {
                 // getting listitem index
                 int songIndex = position;
                 // Starting new intent
-                Intent in = new Intent();
+                Intent in = new Intent(OnlineActivity.this, PlayMusicActivity.class);
                 // Sending songIndex to PlayMusicActivity
                 in.putExtra("songOnlineIndex", songIndex);
                 in.putExtra("txtSearch", txtSearch);
-                setResult(101, in);
+                in.putExtra("MODE", ONLINE_MODE);
+                setResult(Constants.MODE.ONLINE.intValue(), in);
+                startActivity(in);
                 finish();
             }
         });
@@ -66,7 +70,7 @@ public class OnlineActivity extends ListActivity {
 
     public void performSearch(String txtSearch) {
         SongsManager songsManager = new SongsManager();
-        songsManager.readData(txtSearch, new SongsManager.MyCallback() {
+        songsManager.readData(txtSearch, typeSearch, new SongsManager.MyCallback() {
             @Override
             public void onCallback(ArrayList<HashMap<String, String>> songList) {
                 System.out.println("size songlist:" + songList.size());

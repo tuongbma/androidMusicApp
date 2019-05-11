@@ -21,11 +21,19 @@ import java.util.HashMap;
 public class SongsManager {
 
 	private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
-	
+    private ArrayList<HashMap<String, String>> songListOnline;
+	private String DB_NAME = "songs";
+	private FirebaseDatabase database;
+	private static Long TITLE_SEARCH_TYPE = 1L;
+	private static Long ARTST_SEARCH_TYPE = 2L;
 	// Constructor
 	public SongsManager(){
-		
+	    database = FirebaseDatabase.getInstance();
 	}
+
+    public DatabaseReference getFireBaseReference() {
+        return database.getReference(DB_NAME);
+    }
 	
 	/**
 	 * Function to read all mp3 files from sdcard
@@ -48,86 +56,50 @@ public class SongsManager {
 		// return songs list array
 		return songsList;
 	}
-	ArrayList<HashMap<String, String>> songListOnline;
-	public ArrayList<HashMap<String, String>> getOnlineListByName(final String text) {
-		FirebaseDatabase database = FirebaseDatabase.getInstance();
-		songListOnline = new ArrayList<HashMap<String, String>>();
-		DatabaseReference myRef = database.getReference("songs");
-		myRef.addValueEventListener(new ValueEventListener() {
-
-			@Override
-				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				for (DataSnapshot data: dataSnapshot.getChildren()) {
-					Song s = data.getValue(Song.class);
-					String songTitle = s.getTitle();
-					String songArtist = s.getArtist();
-					String songId = data.getKey();
-					if(songTitle.toUpperCase().startsWith(text.toUpperCase())
-							|| songTitle.equals(text)
-							|| songArtist.toUpperCase().startsWith(text.toUpperCase())
-							|| songArtist.equals(text) ) {
-
-						HashMap<String, String> song = new HashMap<String, String>();
-						song.put("songTitle", songTitle);
-						song.put("songPath", s.getSource());
-
-						// Adding each song to SongList
-						songListOnline.add(song);
-						System.out.println("song size 3: " + songListOnline.size());
-
-					}
-				}
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-
-			}
-		});
-		System.out.println("song size: " + songListOnline.size());
-
-		return songListOnline;
-	}
 
 	public interface MyCallback {
 		void onCallback(ArrayList<HashMap<String, String>> value);
 	}
 
-	public void readData(final String text, final MyCallback myCallback) {
-		FirebaseDatabase database = FirebaseDatabase.getInstance();
+	public void readData(final String text, final Long searchType, final MyCallback myCallback) {
 		songListOnline = new ArrayList<HashMap<String, String>>();
-		DatabaseReference myRef = database.getReference("songs");
-		myRef.addValueEventListener(new ValueEventListener() {
+		DatabaseReference myRef = getFireBaseReference();
+		if(text != null && !text.isEmpty()) {
+            myRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot data: dataSnapshot.getChildren()) {
+                        String searchTxt = text.toLowerCase();
+                        Song s = data.getValue(Song.class);
+                        String songTitle = s.getTitle();
+                        String songArtist = s.getArtist();
+                        if(TITLE_SEARCH_TYPE.equals(searchType)) {
+                            if(songTitle.toLowerCase().contains(searchTxt)) {
+                                HashMap<String, String> song = new HashMap<String, String>();
+                                song.put("songTitle", songTitle);
+                                song.put("songPath", s.getSource());
+                                // Adding each song to SongList
+                                songListOnline.add(song);
+                            }
+                        } else if (ARTST_SEARCH_TYPE.equals(searchType)) {
+                            if(songArtist.contains(text.toUpperCase()) ) {
+                                HashMap<String, String> song = new HashMap<String, String>();
+                                song.put("songTitle", songTitle);
+                                song.put("songPath", s.getSource());
+                                // Adding each song to SongList
+                                songListOnline.add(song);
+                            }
+                        }
+                    }
+                    myCallback.onCallback(songListOnline);
+                }
 
-			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				for (DataSnapshot data: dataSnapshot.getChildren()) {
-					Song s = data.getValue(Song.class);
-					String songTitle = s.getTitle();
-					String songArtist = s.getArtist();
-					String songId = data.getKey();
-					if(songTitle.toUpperCase().startsWith(text.toUpperCase())
-							|| songTitle.equals(text)
-							|| songArtist.toUpperCase().startsWith(text.toUpperCase())
-							|| songArtist.equals(text) ) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-						HashMap<String, String> song = new HashMap<String, String>();
-						song.put("songTitle", songTitle);
-						song.put("songPath", s.getSource());
-
-						// Adding each song to SongList
-						songListOnline.add(song);
-
-					}
-				}
-				myCallback.onCallback(songListOnline);
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-
-			}
-		});
+                }
+            });
+        }
 	}
 			/**
 	 * Class to filter files which are having .mp3 extension

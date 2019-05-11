@@ -8,14 +8,20 @@ import java.util.Random;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.AudioManager;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,17 +44,19 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
     private TextView songTitleLabel;
     private TextView songCurrentDurationLabel;
     private TextView songTotalDurationLabel;
+    private ImageView albumPic;
     // Media Player
     private MediaPlayer mp;
     // Handler to update UI timer, progress bar etc,.
     private Handler mHandler = new Handler();
-    ;
+    private String textSearch;
     private Utilities utils;
     private int seekForwardTime = 5000; // 5000 milliseconds
     private int seekBackwardTime = 5000; // 5000 milliseconds
     private int currentSongIndex = 0;
     private boolean isShuffle = false;
     private boolean isRepeat = false;
+    private static final String SERVER_STORAGE = "https://firebasestorage.googleapis.com/v0/b/musicapplication-f21a5.appspot.com/o/";
     private ArrayList<HashMap<String, String>> songsListOffline = new ArrayList<HashMap<String, String>>();
     private ArrayList<HashMap<String, String>> songsListOnline = new ArrayList<HashMap<String, String>>();
     private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
@@ -72,6 +80,7 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
         songTitleLabel = (TextView) findViewById(R.id.songTitle);
         songCurrentDurationLabel = (TextView) findViewById(R.id.songCurrentDurationLabel);
         songTotalDurationLabel = (TextView) findViewById(R.id.songTotalDurationLabel);
+        albumPic = findViewById(R.id.albumPic);
 
         // Mediaplayer
         mp = new MediaPlayer();
@@ -92,7 +101,9 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
 //		System.out.println("CURRENT SONG:" + currentSongIndex);
         songsListOffline = songManager.getOfflineList();
         songsList = songsListOffline;
-        playSong(0);
+        if(songsList.size() > 0) {
+            playSong(0);
+        }
         System.out.println("ON CREATEEEEEE");
 
         /**
@@ -272,17 +283,18 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
 
         btnSearch = findViewById(R.id.btnSearch);
         searchText = (EditText) findViewById(R.id.searchText);
-        btnSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                String searchQuery = searchText.getText().toString();
-                songsListOnline = songManager.getOnlineList(searchQuery);
-                songsList = songsListOnline;
-                Intent onlinePlaylist = new Intent(PlayMusicActivity.this, OnlineActivity.class);
-                onlinePlaylist.putExtra("searchQuery", searchQuery);
-                startActivityForResult(onlinePlaylist, 101);
-            }
-        });
+        //thuc hien tim kiem online
+//        btnSearch.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View arg0) {
+//                String searchQuery = searchText.getText().toString();
+//                songsListOnline = songManager.getOfflineList(searchQuery);
+//                songsList = songsListOnline;
+//                Intent onlinePlaylist = new Intent(PlayMusicActivity.this, OnlineActivity.class);
+//                onlinePlaylist.putExtra("searchQuery", searchQuery);
+//                startActivityForResult(onlinePlaylist, 101);
+//            }
+//        });
     }
 
 
@@ -305,8 +317,10 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
         }
         if (requestCode == 101) { // play online
             try{
+                Intent intent = getIntent();
+                textSearch = intent.getExtras().getString("txtSearch");
                 currentSongIndex = data.getExtras().getInt("songOnlineIndex");
-                playSong(currentSongIndex);
+                playSongOnline(currentSongIndex);
             } catch (NullPointerException ex){
 
             }
@@ -345,6 +359,53 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
         } catch (IllegalStateException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void  playSongOnline(final int songIndex){
+        // Play song
+        try {
+
+            mp.reset();
+            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            songManager.readData(textSearch, new SongsManager.MyCallback() {
+                @Override
+                public void onCallback(ArrayList<HashMap<String, String>> value) {
+                    try {
+                        String source = SERVER_STORAGE + value.get(songIndex).get("songPath");
+                        Uri uri = Uri.parse(source);
+                        mp.setDataSource(source);
+                        mp.prepare();
+                        mp.start();
+                        // Displaying Song title
+                        // Changing Button Image to pause image
+                        btnPlay.setImageResource(R.drawable.btn_pause);
+                        // set Progress bar values
+                        songProgressBar.setProgress(0);
+                        songProgressBar.setMax(100);
+
+                        MediaMetadataRetriever metaRetriver;
+                        metaRetriver = new MediaMetadataRetriever();
+                        metaRetriver.setDataSource(source, new HashMap<String,String>());
+                        System.out.println(metaRetriver.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
+                        // Updating progress bar
+                        byte[] art; art = metaRetriver.getEmbeddedPicture();
+                        Bitmap songImage = BitmapFactory.decodeByteArray(art, 0, art.length);
+                        albumPic.setImageBitmap(songImage);
+                        System.out.println(source);
+                        String songTitle = metaRetriver.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                        songTitleLabel.setText(songTitle);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            updateProgressBar();
+
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalStateException e) {
             e.printStackTrace();
         }
     }

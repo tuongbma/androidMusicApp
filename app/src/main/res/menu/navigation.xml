@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/btnOnline"
+        android:enabled="true"
+        android:icon="@drawable/online"
+        android:title="Recents"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/btnOffline"
+        android:enabled="true"
+        android:icon="@drawable/offline"
+        android:title="Favorites"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/btnPlaying"
+        android:enabled="true"
+        android:icon="@drawable/playing"
+        android:title="Nearby"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/btnPersonal"
+        android:enabled="true"
+        android:icon="@drawable/personal"
+        android:title="Nearby"
+        app:showAsAction="ifRoom" />
+</menu>

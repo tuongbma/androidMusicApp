@@ -2,51 +2,36 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center" >
+    android:gravity="center"
+    android:orientation="vertical">
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/mainImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="-5dp"
-            android:src="@drawable/bma" />
-        <Button
-            android:layout_alignBottom="@+id/mainImage"
-            android:id="@+id/btnOffline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Offline" />
+        <!--<ImageView-->
+        <!--android:id="@+id/mainImage"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_marginTop="-5dp"-->
+        <!--android:src="@drawable/bma" />-->
 
-        <EditText
-            android:layout_alignParentRight="true"
-            android:hint="Tim kiem Online"
-            android:layout_marginLeft="44dp"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:id="@+id/searchText">
-        </EditText>
+        <include layout="@layout/bg_player_header"></include>
 
-        <ImageButton
-            android:id="@+id/btnSearch"
-            android:layout_width="53dp"
-            android:layout_height="57dp"
-            android:layout_alignParentLeft="true"
-            android:background="@null"
-            android:src="@drawable/btn_search" />
         <ListView
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="50dp"
             android:id="@android:id/list"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:divider="#242424"
             android:dividerHeight="1dp"
             android:listSelector="@drawable/list_selector" />
-    </RelativeLayout>
 
+        <include layout="@layout/bg_player_footer"></include>
+
+    </RelativeLayout>
 
 
 </RelativeLayout>

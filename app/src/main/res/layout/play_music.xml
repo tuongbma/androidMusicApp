@@ -194,4 +194,6 @@
             android:background="@null"
             android:src="@drawable/btn_shuffle" />
     </LinearLayout>
+    <include layout="@layout/bg_player_footer"></include>
+
 </RelativeLayout>

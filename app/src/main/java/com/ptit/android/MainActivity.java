@@ -11,6 +11,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.speech.RecognizerIntent;
@@ -42,12 +43,8 @@ import android.widget.Toast;
 
 import com.androidhive.musicplayer.R;
 import com.ptit.android.speechrecognize.RecognizeCommands;
-import java.util.ArrayList;
-import java.util.HashMap;
 
-
-
-public class MainActivity<recordingBufferLock> extends ListActivity {
+public class MainActivity<recordingBufferLock> extends ListActivity      {
 
     private Button  btnOffline;
     private ImageButton btnOnline;
@@ -102,19 +99,18 @@ public class MainActivity<recordingBufferLock> extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         btnOnline = (ImageButton) findViewById(R.id.btnSearch);
-        btnOffline = (Button) findViewById(R.id.btnOffline);
+//        btnOffline = (Button) findViewById(R.id.btnOffline);
         edtSearch = (EditText) findViewById(R.id.searchText);
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         lvSearch = getListView();
         lvSearch.setAdapter(adapter);
-        btnOffline.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                System.out.println("OFLINRRRRRR");
-                Intent intent = new Intent(MainActivity.this, PlayMusicActivity.class);
-                startActivity(intent);
-            }
-        });
+//        btnOffline.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(MainActivity.this, PlayMusicActivity.class);
+//                startActivity(intent);
+//            }
+//        });
 
         btnOnline.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -198,9 +194,9 @@ public class MainActivity<recordingBufferLock> extends ListActivity {
         tfLite.resizeInput(0, new int[] {RECORDING_LENGTH, 1});
 
         // Start the recording and recognition threads.
-        requestMicrophonePermission();
-        startRecording();
-        startRecognition();
+//        requestMicrophonePermission();
+//        startRecording();
+//        startRecognition();
 
     }
 

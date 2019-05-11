@@ -73,11 +73,10 @@
 
     <!-- Player Footer -->
     <LinearLayout
-        android:id="@+id/player_footer_bg"
+        android:id="@+id/player_footer"
         android:layout_width="fill_parent"
         android:layout_height="100dp"
         android:layout_alignParentBottom="true"
-        android:background="@layout/bg_player_footer"
         android:gravity="center">
 
         <!-- Player Buttons -->
@@ -132,7 +131,7 @@
         android:id="@+id/songProgressBar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/player_footer_bg"
+        android:layout_above="@id/player_footer"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="20dp"
@@ -194,4 +193,5 @@
             android:background="@null"
             android:src="@drawable/btn_shuffle" />
     </LinearLayout>
+
 </RelativeLayout>

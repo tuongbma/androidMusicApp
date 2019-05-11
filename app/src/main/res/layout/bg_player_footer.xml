@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">   
-  <gradient
-      android:startColor="#3f3f3f"
-      android:centerColor="#2f2f2f"
-      android:endColor="#1c1c1c"
-      android:angle="270" />
-</shape>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+  <android.support.design.widget.BottomNavigationView
+      android:id="@+id/bottom_navigation"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_marginBottom="0dp"
+      app:itemBackground="@color/colorPrimary"
+      app:itemIconTint="@android:color/white"
+      app:itemTextColor="@android:color/white"
+      app:menu="@menu/navigation" />
+</RelativeLayout>

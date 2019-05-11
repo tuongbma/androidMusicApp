@@ -17,6 +17,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -109,6 +110,7 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
         System.out.println("ON CREATEEEEEE");
         Intent intent = getIntent();
         mode = intent.getExtras().getLong("MODE");
+        System.out.println("mode: " + mode);
         //xu li khi che do phat nhac online
         if(mode != null && Constants.MODE.ONLINE.equals(mode)) {
             textSearch = intent.getExtras().getString("txtSearch");
@@ -204,7 +206,7 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
             public void onClick(View arg0) {
                 // check if next song is there or not
                 if(Constants.MODE.ONLINE.equals(mode)) {
-
+                    playSong(currentSongIndex);
                 } else {
                     if (currentSongIndex < (songsList.size() - 1)) {
                         playSong(currentSongIndex + 1);
@@ -226,15 +228,18 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
 
             @Override
             public void onClick(View arg0) {
-                if (currentSongIndex > 0) {
-                    playSong(currentSongIndex - 1);
-                    currentSongIndex = currentSongIndex - 1;
+                if(Constants.MODE.ONLINE.equals(mode)) {
+                    playSong(currentSongIndex);
                 } else {
-                    // play last song
-                    playSong(songsList.size() - 1);
-                    currentSongIndex = songsList.size() - 1;
+                    if (currentSongIndex > 0) {
+                        playSong(currentSongIndex - 1);
+                        currentSongIndex = currentSongIndex - 1;
+                    } else {
+                        // play last song
+                        playSong(songsList.size() - 1);
+                        currentSongIndex = songsList.size() - 1;
+                    }
                 }
-
             }
         });
 
@@ -403,28 +408,14 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
                     try {
                         songsList = value;
                         String source = SERVER_STORAGE + value.get(songIndex).get("songPath");
-                        Uri uri = Uri.parse(source);
+                        setInfoPlayingSong(source);
                         mp.setDataSource(source);
                         mp.prepare();
                         mp.start();
-                        // Displaying Song title
-                        // Changing Button Image to pause image
                         btnPlay.setImageResource(R.drawable.btn_pause);
                         // set Progress bar values
                         songProgressBar.setProgress(0);
                         songProgressBar.setMax(100);
-
-                        MediaMetadataRetriever metaRetriver;
-                        metaRetriver = new MediaMetadataRetriever();
-                        metaRetriver.setDataSource(source, new HashMap<String,String>());
-                        System.out.println(metaRetriver.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
-                        // Updating progress bar
-                        byte[] art; art = metaRetriver.getEmbeddedPicture();
-                        Bitmap songImage = BitmapFactory.decodeByteArray(art, 0, art.length);
-                        albumPic.setImageBitmap(songImage);
-                        System.out.println(source);
-                        String songTitle = metaRetriver.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                        songTitleLabel.setText(songTitle);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -444,6 +435,18 @@ public class PlayMusicActivity extends Activity implements OnCompletionListener,
      */
     public void updateProgressBar() {
         mHandler.postDelayed(mUpdateTimeTask, 100);
+    }
+
+    public void setInfoPlayingSong(String source) {
+        MediaMetadataRetriever metaRetriver = new MediaMetadataRetriever();
+        metaRetriver.setDataSource(source, new HashMap<String,String>());
+
+        byte[] art; art = metaRetriver.getEmbeddedPicture();
+        Bitmap songImage = BitmapFactory.decodeByteArray(art, 0, art.length);
+        albumPic.setImageBitmap(songImage);
+
+        String songTitle = metaRetriver.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        songTitleLabel.setText(songTitle);
     }
 
     /**

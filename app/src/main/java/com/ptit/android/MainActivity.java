@@ -11,11 +11,13 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,12 +44,9 @@ import android.widget.Toast;
 
 import com.androidhive.musicplayer.R;
 import com.ptit.android.speechrecognize.RecognizeCommands;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 
-
-public class MainActivity<recordingBufferLock> extends Activity {
+public class MainActivity<recordingBufferLock> extends ListActivity      {
 
     private Button  btnOffline;
     private ImageButton btnOnline;
@@ -81,6 +80,7 @@ public class MainActivity<recordingBufferLock> extends Activity {
     private List<String> displayedLabels = new ArrayList<>();
     private RecognizeCommands recognizeCommands = null;
     private Interpreter tfLite;
+    private String txtSearch;
 
     // UI elements.
     private static final int REQUEST_RECORD_AUDIO = 13;
@@ -102,24 +102,24 @@ public class MainActivity<recordingBufferLock> extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         btnOnline = (ImageButton) findViewById(R.id.btnSearch);
-        btnOffline = (Button) findViewById(R.id.btnOffline);
+//        btnOffline = (Button) findViewById(R.id.btnOffline);
         edtSearch = (EditText) findViewById(R.id.searchText);
-//        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-//        lvSearch = getListView();
-//        lvSearch.setAdapter(adapter);
-        btnOffline.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                System.out.println("OFLINRRRRRR");
-                Intent intent = new Intent(MainActivity.this, PlayMusicActivity.class);
-                startActivity(intent);
-            }
-        });
+
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        lvSearch = getListView();
+        lvSearch.setAdapter(adapter);
+//        btnOffline.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(MainActivity.this, PlayMusicActivity.class);
+//                startActivity(intent);
+//            }
+//        });
 
         btnOnline.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                String txtSearch = edtSearch.getText().toString();
+                txtSearch = edtSearch.getText().toString();
                 if(txtSearch != null && !txtSearch.isEmpty()) {
                     Intent intent = new Intent(MainActivity.this, OnlineActivity.class);
                     intent.putExtra("txtSearch", txtSearch);
@@ -128,22 +128,41 @@ public class MainActivity<recordingBufferLock> extends Activity {
             }
         });
 
-//        edtSearch.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                performSearch(edtSearch.getText().toString());
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//
-//            }
-//        });
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                performSearch(edtSearch.getText().toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+
+    lvSearch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            // getting listitem index
+            int songIndex = position;
+            // Starting new intent
+            Intent in = new Intent(MainActivity.this, PlayMusicActivity.class);
+            // Sending songIndex to PlayMusicActivity
+            txtSearch = edtSearch.getText().toString();
+            in.putExtra("songOnlineIndex", songIndex);
+            in.putExtra("txtSearch", txtSearch);
+            in.putExtra("MODE", Constants.MODE.ONLINE);
+            in.putExtra("typeSearch", Constants.SEARCH_TYPE.TITLE);
+            startActivity(in);
+            finish();
+        }
+    });
 
         String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
         Log.i(LOG_TAG, "Reading labels from: " + actualLabelFilename);
@@ -188,20 +207,22 @@ public class MainActivity<recordingBufferLock> extends Activity {
     }
 
 
-//    public void performSearch(String txtSearch) {
-//        SongsManager songsManager = new SongsManager();
-//        songsManager.readData(txtSearch, new SongsManager.MyCallback() {
-//            @Override
-//            public void onCallback(ArrayList<HashMap<String, String>> songList) {
-//                System.out.println("size songlist:" + songList.size());
-//                ListAdapter adapter = new SimpleAdapter(MainActivity.this, songList,
-//                        R.layout.playlist_item, new String[] { "songTitle" }, new int[] {
-//                        R.id.songTitle });
-//                setListAdapter(adapter);
-//            }
-//
-//        });
-//    }
+    public void performSearch(String txtSearch) {
+        SongsManager songsManager = new SongsManager();
+        songsManager.readData(txtSearch, Constants.SEARCH_TYPE.TITLE, new SongsManager.MyCallback() {
+            @Override
+            public void onCallback(ArrayList<HashMap<String, String>> songList) {
+                System.out.println("size songlist:" + songList.size());
+                ListAdapter adapter = new SimpleAdapter(MainActivity.this, songList,
+                        R.layout.playlist_item, new String[] { "songTitle" }, new int[] {
+                        R.id.songTitle });
+                setListAdapter(adapter);
+            }
+
+        });
+    }
+
+
 
     private void requestMicrophonePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

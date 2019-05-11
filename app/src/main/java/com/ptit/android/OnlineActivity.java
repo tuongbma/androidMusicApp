@@ -62,7 +62,6 @@ public class OnlineActivity extends ListActivity {
                 in.putExtra("txtSearch", txtSearch);
                 in.putExtra("MODE", ONLINE_MODE);
                 setResult(Constants.MODE.ONLINE.intValue(), in);
-                startActivity(in);
                 finish();
             }
         });
